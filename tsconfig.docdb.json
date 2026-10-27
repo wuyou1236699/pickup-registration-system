@@ -1,0 +1,4 @@
+{
+  "compilerOptions": { "target": "ES2022", "module": "CommonJS", "moduleResolution": "Node", "rootDir": ".", "outDir": "dist/docdb", "strict": true, "esModuleInterop": true, "skipLibCheck": true, "types": ["node"] },
+  "include": ["cloudfunctions/pickup-docdb/**/*.ts", "shared/**/*.ts"]
+}

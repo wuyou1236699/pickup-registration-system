@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "module": "CommonJS", "moduleResolution": "Node",
+    "strict": true, "esModuleInterop": true, "skipLibCheck": true,
+    "rootDir": ".", "outDir": ".local-runtime/docdb-tools", "types": ["node"]
+  },
+  "include": ["local-tools/docdb-simulator.ts", "cloudfunctions/pickup-docdb/service.ts", "shared/**/*.ts"]
+}

@@ -1,0 +1,46 @@
+import { test, expect } from '@playwright/test'
+const fixture = '/tests/fixtures/formal-auth.html'
+test('unauthenticated, anonymous and other accounts cannot mount the private page or synchronization', async ({ page }) => {
+  for (const user of ['', 'anonymous', 'outsider']) {
+    await page.goto(fixture)
+    await page.evaluate(user => { sessionStorage.setItem('fake-user', user) }, user)
+    await page.reload()
+    await expect(page.getByRole('button', { name: '登录', exact: true })).toBeEnabled()
+    await expect(page.getByText('虚构名单', { exact: true })).toHaveCount(0)
+    expect(await page.locator('body').getAttribute('data-syncing')).not.toBe('true')
+  }
+})
+test('password login, refresh restoration, logout and session loss control private page lifetime', async ({ page }) => {
+  await page.goto(fixture)
+  await expect(page.getByRole('button', { name: '登录', exact: true })).toBeEnabled()
+  await page.getByLabel('用户名').fill('staff01')
+  await page.getByLabel('密码', { exact: true }).fill('fake-password')
+  await page.getByRole('button', { name: '登录', exact: true }).click()
+  await expect(page.getByRole('button', { name: '退出登录' })).toBeVisible()
+  await expect(page.getByText('当前用户：staff01', { exact: true })).toBeVisible()
+  await expect(page.locator('body')).toHaveAttribute('data-syncing', 'true')
+  await page.reload()
+  await expect(page.getByText('当前用户：staff01', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: '退出登录' })).toBeVisible()
+  await page.getByRole('button', { name: '退出登录' }).click()
+  await expect(page.getByText(/^当前用户：/)).toHaveCount(0)
+  await expect(page.getByRole('button', { name: '登录', exact: true })).toBeEnabled()
+  await expect(page.locator('body')).toHaveAttribute('data-syncing', 'false')
+  await page.getByLabel('用户名').fill('auditor')
+  await page.getByLabel('密码', { exact: true }).fill('fake-password')
+  await page.getByRole('button', { name: '登录', exact: true }).click()
+  await expect(page.getByRole('button', { name: '退出登录' })).toBeVisible()
+  await expect(page.getByText('当前用户：auditor', { exact: true })).toBeVisible()
+  await page.evaluate(() => window.dispatchEvent(new Event('fake-session-lost')))
+  await expect(page.getByRole('button', { name: '登录', exact: true })).toBeEnabled()
+  await expect(page.locator('body')).toHaveAttribute('data-syncing', 'false')
+})
+test('real formal app without local cloud configuration shows login only and makes no cloud requests', async ({ page }) => {
+  const cloudRequests: string[] = []
+  page.on('request', request => { if (/tcloudbase|tencentcloud|cloudbase\.net/.test(request.url())) cloudRequests.push(request.url()) })
+  await page.goto('/manage')
+  await expect(page.getByRole('heading', { name: '接人系统登录' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '登录', exact: true })).toBeEnabled()
+  await expect(page.getByRole('table')).toHaveCount(0)
+  expect(cloudRequests).toEqual([])
+})

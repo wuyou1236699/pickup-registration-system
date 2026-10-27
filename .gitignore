@@ -1,0 +1,47 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+*.local
+*.tsbuildinfo
+
+# Local artifacts and caches
+deliveries/
+coverage/
+.cache/
+.vite/
+.npm/
+*.log
+*.tmp
+*.bak
+*~
+*.zip
+.git-preparation/
+.local-runtime/
+*.png
+*.jpg
+*.jpeg
+
+# Environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+credentials.json
+service-account*.json
+
+# Real roster and source workbooks stay local
+src/data/roster.json
+src/data/import-report.json
+*.xlsx
+*.xls
+
+# Only fictional portfolio screenshots are public.
+!docs/images/
+!docs/images/*.png
+*.local.json
